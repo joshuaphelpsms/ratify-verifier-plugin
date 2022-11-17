@@ -106,8 +106,8 @@ You'll need to use this image, which contains your plugin, in your Ratify chart 
 
 ```shell
 # See note on CRDs below; this version of Ratify won't work as-is yet
-docker build -t myregistry.azurecr.io/ratify-with-plugins:v1.0.0-alpha.3 .
-docker push myregistry.azurecr.io/ratify-with-plugins:v1.0.0-alpha.3
+docker build -t myregistry.azurecr.io/ratify-with-plugins:v1.0.0-beta.1 .
+docker push myregistry.azurecr.io/ratify-with-plugins:vv1.0.0-beta.1
 ```
 
 And in your Ratify [chart](https://github.com/deislabs/ratify/tree/main/charts/ratify) values:
@@ -115,7 +115,7 @@ And in your Ratify [chart](https://github.com/deislabs/ratify/tree/main/charts/r
 ```yaml
 image:
   repository: myregistry.azurecr.io/ratify-with-plugins
-  tag: v1.0.0-alpha.3
+  tag: v1.0.0-beta.1
   pullPolicy: IfNotPresent
 # /snip...
 ```

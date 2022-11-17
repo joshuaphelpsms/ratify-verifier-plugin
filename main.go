@@ -16,12 +16,14 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
 	"github.com/deislabs/ratify/pkg/common"
 	"github.com/deislabs/ratify/pkg/ocispecs"
 	"github.com/deislabs/ratify/pkg/referrerstore"
+	_ "github.com/deislabs/ratify/pkg/referrerstore/oras"
 	"github.com/deislabs/ratify/pkg/verifier"
 	"github.com/deislabs/ratify/pkg/verifier/plugin/skel"
 )
@@ -55,9 +57,33 @@ func VerifyReference(args *skel.CmdArgs, subjectReference common.Reference, refe
 		return nil, err
 	}
 
+	ctx := context.Background()
+
+	referenceManifest, err := referrerStore.GetReferenceManifest(ctx, subjectReference, referenceDescriptor)
+	if err != nil {
+		return nil, err
+	}
+
+	byteCounter := 0
+
+	for _, blobDesc := range referenceManifest.Blobs {
+		refBlob, err := referrerStore.GetBlobContent(ctx, subjectReference, blobDesc.Digest)
+		if err != nil {
+			return nil, err
+		}
+		byteCounter += len(refBlob)
+		if len(refBlob) == 0 {
+			return &verifier.VerifierResult{
+				Name:      input.Name,
+				IsSuccess: false,
+				Message:   "Sample verification failed",
+			}, nil
+		}
+	}
+
 	return &verifier.VerifierResult{
 		Name:      input.Name,
-		IsSuccess: referenceDescriptor.Size > 0,
-		Message:   "Sample verification success",
+		IsSuccess: true,
+		Message:   fmt.Sprintf("Sample verification success. Total bytes: %d", byteCounter),
 	}, nil
 }
